@@ -31,11 +31,14 @@ namespace UAsset2Json
         {
             Console.WriteLine(path);
             using var assetStream = File.OpenRead(Path.ChangeExtension(path, "uasset"));
-            using var expStream = File.OpenRead(Path.ChangeExtension(path, "uexp"));
+            //Skip attempting to open .uexp file.
+            //TODO: logic to check if file exists, only open if it does
+            //using var expStream = File.OpenRead(Path.ChangeExtension(path, "uexp"));
 
             VisitorFactory.LoadVisitors();
             VisitorFactory.SetEnumAsByte();
-            var asset = new UAsset(assetStream, expStream);
+            //TODO: set up expStream logic instead of hard-coding null
+            var asset = new UAsset(assetStream, null);
             var arr = asset.Summary.Exports.SelectMany(x => x.Objects).Select(x => x.ToDictionary()).ToArray();
 
             File.WriteAllText(Path.ChangeExtension(path, "json"), JsonConvert.SerializeObject(arr.Length < 2 ? (asset.Summary.Exports.FirstOrDefault()?.Objects.FirstOrDefault()?.ObjectData?.Serialize() ?? arr) : arr, Formatting.Indented, new JsonSerializerSettings
